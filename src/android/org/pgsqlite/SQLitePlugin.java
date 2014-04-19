@@ -190,7 +190,8 @@ public class SQLitePlugin extends CordovaPlugin
 	 */
 	private void openDatabase(String dbname, String password)
 	{
-		if (this.getDatabase(dbname) != null) this.closeDatabase(dbname);
+		if (this.getDatabase(dbname) != null) 
+			this.closeDatabase(dbname);
 
 		
 		File dbfile = new File(Environment.getExternalStorageDirectory()+File.separator+dbname);
@@ -202,10 +203,11 @@ public class SQLitePlugin extends CordovaPlugin
 		}
 
 		Log.v("info", "Open sqlite db: " + dbfile.getAbsolutePath());
-
-		SQLiteDatabase mydb = SQLiteDatabase.openOrCreateDatabase(dbfile, null);
-
-		dbmap.put(dbname, mydb);
+		
+		synchronized(this) {
+			SQLiteDatabase mydb = SQLiteDatabase.openOrCreateDatabase(dbfile, null);
+			dbmap.put(dbname, mydb);
+		}
 	}
 
 	/**
@@ -221,8 +223,10 @@ public class SQLitePlugin extends CordovaPlugin
 
 		if (mydb != null)
 		{
-			mydb.close();
-			dbmap.remove(dbName);
+			synchronized(this) {
+				mydb.close();
+				dbmap.remove(dbName);
+			}
 		}
 	}
 
